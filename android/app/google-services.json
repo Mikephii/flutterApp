@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "819999562577",
+    "project_id": "buddybrew-app",
+    "storage_bucket": "buddybrew-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:819999562577:android:7ea3dc7e9c507d2df2d170",
+        "android_client_info": {
+          "package_name": "app.buddybrew.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "819999562577-8jpktj5okk947jdl6pbot2mg5pmgs0lk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "app.buddybrew.app",
+            "certificate_hash": "557a5765bbf06d653020e2afc03885392df52883"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD1Vsv6QVncdZ-UpPHAdWZ27EMj8Esb_KY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "819999562577-qsrnh4h9dhdioj9ios9j6p5r82kg7p84.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "app.buddybrew.app"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
