@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:buddybrew/services/supa_auth.dart';
+import 'package:buddybrew/services/auth_service/supabase/supa_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -37,9 +37,8 @@ class _SignupFormState extends State<SignupForm> {
       _isLoadingSignup = true;
     });
     try {
-      final res = await SupaAuthService()
-          .signup(_emailController.text, _passwordController.text);
-      inspect(res);
+      await SupaAuthService().signUpWithEmailPassword(
+          _emailController.text, _passwordController.text);
     } on AuthException catch (e) {
       setState(() {
         _formErrorMessage = e.message;

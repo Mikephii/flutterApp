@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
@@ -7,31 +8,60 @@ import 'package:buddybrew/oauth_ids.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' hide AuthUser;
 
-class SupaAuthService {
-  final Stream<AuthState> authStateStream = supabase.auth
-      .onAuthStateChange; //TODO: create own auth state stream to decouple from supabase
+import '../auth_interface.dart';
+import '../models/auth_user.dart';
 
-  final user = supabase.auth.currentUser;
+class SupaAuthService implements AuthInterface {
+  late final StreamSubscription<AuthState> _userSubscription;
+  SupaAuthService() {
+    //listen to authstate changes from supabase an update our current user
+    _userSubscription = supabase.auth.onAuthStateChange.listen((event) {
+      currentUser = _authUserFromSupaUser(supabase.auth.currentUser);
+    });
+    // Initialize currentUser with the current user at the time of instantiation
+    currentUser = _authUserFromSupaUser(supabase.auth.currentUser);
+  }
 
-  Future<AuthResponse> signInWithEmailPassword(String email, String password) {
+  @override
+  final Stream<AuthUser?> userStream =
+      supabase.auth.onAuthStateChange.map((event) {
+    var id = supabase.auth.currentUser?.id;
+    if (id != null) return AuthUser(id: id);
+    return null;
+  });
+
+  @override
+  AuthUser? currentUser;
+
+  AuthUser? _authUserFromSupaUser(User? user) {
+    var id = user?.id;
+    if (id != null) {
+      return AuthUser(id: id);
+    }
+    return null;
+  }
+
+  @override
+  signInWithEmailPassword(String email, String password) async {
     try {
-      return supabase.auth.signInWithPassword(email: email, password: password);
-    } on AuthException catch (e) {
+      await supabase.auth.signInWithPassword(email: email, password: password);
+    } catch (e) {
       throw const AuthException("Invalid email or password");
     }
   }
 
-  Future<AuthResponse> signup(String email, String password) {
+  @override
+  signUpWithEmailPassword(String email, String password) async {
     try {
-      return supabase.auth.signUp(email: email, password: password);
-    } on AuthException catch (e) {
-      throw const AuthException(
-          "Signup failed, please try again later"); //TODO: create own exception to decouple from supabase
+      await supabase.auth.signUp(email: email, password: password);
+    } catch (e) {
+      throw const AuthException("Signup failed, please try again later");
     }
   }
 
+  @override
   Future<void> signOut() async {
     try {
       await supabase.auth.signOut();
@@ -41,14 +71,15 @@ class SupaAuthService {
     }
   }
 
-  Future<AuthResponse> googleLogin() async {
+  @override
+  signInWithGoogle() async {
     //use native google sign in if on android, otherwise use appauth
     //native doesnt work on ios because it doesnt return a nonce
     try {
       if (Platform.isAndroid) {
-        return _googleSignInUsingFlutterPackage();
+        await _googleSignInUsingFlutterPackage();
       } else if (Platform.isIOS) {
-        return _googleSignInUsingAppAuth();
+        await _googleSignInUsingAppAuth();
       } else {
         throw UnsupportedError('Unsupported platform');
       }
@@ -81,13 +112,13 @@ class SupaAuthService {
     final googleUser = await googleSignIn.signIn();
 
     if (googleUser == null) {
-      throw ("The google user is null");
+      throw const AuthException("The google user is null");
     }
 
     final googleAuth = await googleUser.authentication;
 
     if (googleAuth == null) {
-      throw ("The google auth is null");
+      throw const AuthException("The google auth is null");
     }
 
     return supabase.auth.signInWithIdToken(
@@ -166,5 +197,11 @@ class SupaAuthService {
       idToken: idToken,
       nonce: rawNonce,
     );
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _userSubscription
+        .cancel(); // Don't forget to cancel the subscription when done
   }
 }

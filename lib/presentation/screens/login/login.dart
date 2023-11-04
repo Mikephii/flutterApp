@@ -1,12 +1,9 @@
-import 'package:buddybrew/services/supa_auth.dart';
+import 'package:buddybrew/services/auth_service/supabase/supa_auth.dart';
 import 'package:buddybrew/presentation/shared/buddybrew_logo.dart';
 import 'package:buddybrew/presentation/screens/login/email_login_form.dart';
 import 'package:buddybrew/presentation/screens/login/email_signup_form.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:buddybrew/services/auth.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -51,13 +48,13 @@ class LoginScreen extends StatelessWidget {
                   color: Theme.of(context).colorScheme.secondaryContainer,
                   icon: FontAwesomeIcons.google,
                   text: "Continue with Google",
-                  loginMethod: SupaAuthService().googleLogin),
+                  loginMethod: SupaAuthService().signInWithGoogle),
               //will become apple login button
               LoginButton(
                   color: Colors.black,
                   icon: FontAwesomeIcons.apple,
                   text: "Continue with Apple",
-                  loginMethod: SupaAuthService().googleLogin),
+                  loginMethod: SupaAuthService().signInWithGoogle),
             ],
           ),
         ),
